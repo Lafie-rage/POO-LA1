@@ -1,17 +1,15 @@
-package main;
+package quizz;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Question extends Option{
+public class Question extends Option implements Comparable<Question>{
 
-    private String categorie;
     private List<Reponse> propositions = new ArrayList<>();
     private Reponse bonneReponse;
 
-    public Question(int noOption, String texteOption, String categorie, List<Reponse> propositions, Reponse bonneReponse) {
-        super(noOption, texteOption);
-        this.categorie = categorie;
+    public Question(String texteOption, List<Reponse> propositions, Reponse bonneReponse) {
+        super(texteOption);
         setProposition(propositions);
         setBonneReponse(bonneReponse);
     }
@@ -34,5 +32,10 @@ public class Question extends Option{
 
     public boolean isCorrect(int pos) {
         return bonneReponse == propositions.get(pos);
+    }
+
+    @Override
+    public int compareTo(Question question) {
+        return Integer.compare(this.noOption, question.noOption);
     }
 }

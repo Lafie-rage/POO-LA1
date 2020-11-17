@@ -1,30 +1,19 @@
-package main;
+package quizz;
 
 import java.util.Objects;
 
 public class Option implements InformationGenerale {
-    protected int noOption;
+    protected final int noOption = countItems++;
     private String texteOption;
 
     private static int countItems = 0;
 
-    public Option(int noOption, String texteOption) {
-        this.noOption = noOption;
+    public Option(String texteOption) {
         this.texteOption = texteOption;
-        countItems++;
-    }
-
-    public void finalize() { // deprecated
-        System.out.println("Objet détruit");
-        countItems--;
     }
 
     public int getNoOption() {
         return noOption;
-    }
-
-    public void setNoOption(int noOption) {
-        this.noOption = noOption;
     }
 
     public String getTexteOption() {
