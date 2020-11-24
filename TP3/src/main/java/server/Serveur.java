@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Serveur extends Thread {
     private ServerSocket serverSocket;
-    private static final List<Connexion> connexions = new ArrayList<>();
+    private final List<Connexion> connexions = new ArrayList<>();
 
     public Serveur() throws IOException {
         serverSocket = new ServerSocket(60000);
@@ -16,11 +16,11 @@ public class Serveur extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 Socket client = serverSocket.accept();
                 synchronized (connexions){
-                    connexions.add(new Connexion(client));
+                    connexions.add(new Connexion(client, this));
                     connexions.get(connexions.size()-1).start();
                 }
             } catch (IOException e) {
@@ -29,6 +29,8 @@ public class Serveur extends Thread {
             }
             System.out.println("Nombre de connexion(s) : " + connexions.size());
         }
+        fermerStocketEcoute();
+        this.interrupt();
     }
 
     private void fermerStocketEcoute() {
@@ -39,7 +41,7 @@ public class Serveur extends Thread {
         }
     }
 
-    public static synchronized List<Connexion> getConnexions() {
+    public synchronized List<Connexion> getConnexions() {
         return new ArrayList<>(connexions);
     }
 
@@ -53,7 +55,7 @@ public class Serveur extends Thread {
 
     }
 
-    public static synchronized void removeConnexion(Connexion connexion) {
+    public synchronized void removeConnexion(Connexion connexion) {
         connexions.remove(connexion);
     }
 }

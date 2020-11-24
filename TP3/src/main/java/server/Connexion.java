@@ -5,13 +5,15 @@ import java.net.Socket;
 import java.net.SocketException;
 
 public class Connexion extends Thread {
+    private Serveur server;
     private Socket client;
     private BufferedReader reader;
     private PrintWriter writer;
 
     private String id;
 
-    public Connexion(Socket client) throws IOException {
+    public Connexion(Socket client, Serveur server) throws IOException {
+        this.server = server;
         this.client = client;
         // read
         InputStreamReader input = new InputStreamReader(this.client.getInputStream());
@@ -34,10 +36,10 @@ public class Connexion extends Thread {
                 System.out.println("Serveur : " + msg);
                 if (msg.equals("CONNEXION_CLOSED")) {
                     client.close();
-                    Serveur.removeConnexion(this);
-                    break;
+                    server.removeConnexion(this);
+                    return;
                 }
-                for (Connexion client : Serveur.getConnexions())
+                for (Connexion client : server.getConnexions())
                     client.envoyerMessage(msg);
             }
 
@@ -49,7 +51,7 @@ public class Connexion extends Thread {
                     ioException.printStackTrace();
                 }
                 finally {
-                    Serveur.removeConnexion(this);
+                    server.removeConnexion(this);
                 }
                 return;
             }

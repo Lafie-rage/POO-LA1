@@ -17,12 +17,13 @@ public class Ecouteur extends Thread {
     public void run() {
         String msg;
         try {
-            while ((msg = reader.readLine()) != null) {
+            while (!Thread.currentThread().isInterrupted() && (msg = reader.readLine()) != null) {
                 System.out.println("Client : " + msg);
                 textArea.append(msg + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.interrupt();
     }
 }

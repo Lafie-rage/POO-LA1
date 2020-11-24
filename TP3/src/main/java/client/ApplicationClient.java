@@ -28,17 +28,9 @@ public class ApplicationClient extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonSend);
 
-        buttonSend.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onSend();
-            }
-        });
+        buttonSend.addActionListener(e -> onSend());
 
-        buttonExit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonExit.addActionListener(e -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -49,11 +41,7 @@ public class ApplicationClient extends JDialog {
         });
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         listener = new Ecouteur(reader, textArea);
         listener.start();
@@ -71,7 +59,6 @@ public class ApplicationClient extends JDialog {
         String message = messageField.getText();
         writer.println(name + " : " + message);
         writer.flush();
-        nameField.setText("");
         messageField.setText("");
     }
 
@@ -97,6 +84,7 @@ public class ApplicationClient extends JDialog {
             writer.println("CONNEXION_CLOSED");
             writer.flush();
             client.close();
+            listener.interrupt();
         } catch (IOException e) {
             System.out.println("Client already closed");
         }
