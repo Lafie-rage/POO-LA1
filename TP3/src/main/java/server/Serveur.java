@@ -26,6 +26,7 @@ public class Serveur extends Thread {
             } catch (IOException e) {
                 System.out.println("Fermeture du serveur");
                 fermerStocketEcoute();
+                this.interrupt();
             }
             System.out.println("Nombre de connexion(s) : " + connexions.size());
         }

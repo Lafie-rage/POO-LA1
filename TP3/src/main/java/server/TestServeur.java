@@ -17,7 +17,7 @@ public class TestServeur extends Thread {
                  BufferedReader reader = new BufferedReader(input)) {
                 String line = reader.readLine();
                 System.out.println("Acception d'un client");
-                System.out.println("Message : " + line);
+                System.out.println("model.Message : " + line);
             }
             System.out.println("Fin de la connexion");
         } catch (IOException e) {

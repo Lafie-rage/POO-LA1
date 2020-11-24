@@ -1,5 +1,7 @@
 package server;
 
+import model.Message;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
@@ -7,42 +9,37 @@ import java.net.SocketException;
 public class Connexion extends Thread {
     private Serveur server;
     private Socket client;
-    private BufferedReader reader;
-    private PrintWriter writer;
+    private ObjectInputStream reader;
+    private ObjectOutputStream writer;
 
     private String id;
 
     public Connexion(Socket client, Serveur server) throws IOException {
         this.server = server;
         this.client = client;
-        // read
-        InputStreamReader input = new InputStreamReader(this.client.getInputStream());
-        reader = new BufferedReader(input);
         // write
-        OutputStreamWriter output = new OutputStreamWriter(this.client.getOutputStream());
-        writer = new PrintWriter(output);
+        writer = new ObjectOutputStream(this.client.getOutputStream());
+        // read
+        reader = new ObjectInputStream(this.client.getInputStream());
     }
 
-    private synchronized void envoyerMessage(String message) {
-        writer.println(message);
+    private synchronized void envoyerMessage(Object message) throws IOException {
+        writer.writeObject(message);
         writer.flush();
     }
 
     @Override
     public void run() {
-        String msg;
+        Object msg;
         try {
-            while ((msg = reader.readLine()) != null) {
+            while ((msg = reader.readObject()) != null) {
                 System.out.println("Serveur : " + msg);
-                if (msg.equals("CONNEXION_CLOSED")) {
-                    client.close();
-                    server.removeConnexion(this);
-                    return;
-                }
                 for (Connexion client : server.getConnexions())
                     client.envoyerMessage(msg);
             }
-
+            // Si null, on coupe la connexion
+            client.close();
+            server.removeConnexion(this);
         } catch (IOException e) {
             if (e instanceof SocketException) {
                 try {
@@ -55,6 +52,8 @@ public class Connexion extends Thread {
                 }
                 return;
             }
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

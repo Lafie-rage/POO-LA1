@@ -1,9 +1,12 @@
 package client;
 
+import model.Message;
+
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.security.MessageDigest;
 
 public class ApplicationClient extends JDialog {
     private JPanel contentPane;
@@ -12,9 +15,9 @@ public class ApplicationClient extends JDialog {
     private JTextArea textArea;
     private JTextField messageField;
     private JTextField nameField;
-    private BufferedReader reader;
-    private PrintWriter writer;
-    private Ecouteur listener;
+    private ObjectInputStream reader;
+    private ObjectOutputStream writer;
+    private final Ecouteur listener;
 
     private Socket client;
 
@@ -56,10 +59,16 @@ public class ApplicationClient extends JDialog {
 
     private void onSend() {
         String name = nameField.getText();
-        String message = messageField.getText();
-        writer.println(name + " : " + message);
-        writer.flush();
+        String textMessage = messageField.getText();
+        Message message = new Message(name, textMessage);
+        try {
+            writer.writeObject(message);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         messageField.setText("");
+        nameField.setEditable(false);
     }
 
     private void onCancel() {
@@ -68,12 +77,10 @@ public class ApplicationClient extends JDialog {
 
     private void setUpConnexion() throws IOException {
         client = new Socket("127.0.0.1", 60000);
-        // read
-        InputStreamReader input = new InputStreamReader(this.client.getInputStream());
-        reader = new BufferedReader(input);
         // write
-        OutputStreamWriter output = new OutputStreamWriter(this.client.getOutputStream());
-        writer = new PrintWriter(output);
+        writer = new ObjectOutputStream(this.client.getOutputStream());
+        // read
+        reader = new ObjectInputStream(this.client.getInputStream());
     }
 
 
@@ -81,7 +88,7 @@ public class ApplicationClient extends JDialog {
     @Override
     public void dispose() {
         try {
-            writer.println("CONNEXION_CLOSED");
+            writer.writeObject(null);
             writer.flush();
             client.close();
             listener.interrupt();
